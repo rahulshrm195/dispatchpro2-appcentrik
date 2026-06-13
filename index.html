@@ -304,7 +304,7 @@ body{font-family:'Inter',sans-serif;background:#F5F5F2;color:#1A1A1A;min-height:
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot, query, where, orderBy, serverTimestamp, writeBatch, increment } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getFirestore, collection, doc, getDoc, getDocs, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, query, where, orderBy, serverTimestamp, writeBatch, increment } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 const APP_VERSION = 'v1.0.0';
@@ -1504,7 +1504,7 @@ window.saveNewUser = async () => {
   try {
     const tenantName = currentProfile.tenantName||'';
     const cred = await createUserWithEmailAndPassword(auth2, email, pass);
-    await addDoc(collection(db,'users'),{uid:cred.user.uid,name,email,role,tenantId:currentTenantId,tenantName,disabled:false});
+    await setDoc(doc(db,'users',cred.user.uid),{uid:cred.user.uid,name,email,role,tenantId:currentTenantId,tenantName,disabled:false});
     usersCache = [...usersCache,{uid:cred.user.uid,name,email,role,tenantId:currentTenantId,disabled:false}];
     closeForm(); showToast(`✅ ${name} added`); renderTab(currentTab);
   } catch(e) {
@@ -1663,7 +1663,7 @@ window.saveNewTenant = async () => {
     const tenantId = name.toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-');
     await addDoc(collection(db,'tenants'),{id:tenantId,name,city:city||'',active:true,createdAt:serverTimestamp()});
     const cred = await createUserWithEmailAndPassword(auth2,email,pass);
-    await addDoc(collection(db,'users'),{uid:cred.user.uid,name:'Admin',email,role:'admin',tenantId,tenantName:name,disabled:false});
+    await setDoc(doc(db,'users',cred.user.uid),{uid:cred.user.uid,name:'Admin',email,role:'admin',tenantId,tenantName:name,disabled:false});
     tenantsCache = [...tenantsCache,{id:tenantId,name,city:city||'',active:true}];
     closeForm(); showToast(`✅ Tenant "${name}" created`); renderTab(0);
   } catch(e) {
